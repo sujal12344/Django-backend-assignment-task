@@ -1,0 +1,45 @@
+# docker-compose.yml
+# Yeh file 2 services define karti hai:
+#   1. db      = PostgreSQL database (Docker container)
+#   2. web     = Django application (hamara code)
+
+services:
+
+  # ─── Service 1: PostgreSQL Database ──────────────────────────────────────────
+  db:
+    image: postgres:15-alpine          # Official PostgreSQL image (alpine = chhota size)
+    restart: always                    # Crash hone par automatically restart karo
+    environment:
+      POSTGRES_DB: credit_db           # Database naam
+      POSTGRES_USER: credit_user       # Username
+      POSTGRES_PASSWORD: credit_pass   # Password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Data save karo (container band hone par bhi)
+    ports:
+      - "5433:5432"                    # Host:5433 → Container:5432 (5432 already Supabase ke liye use ho sakta hai)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U credit_user -d credit_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ─── Service 2: Django Web Application ───────────────────────────────────────
+  web:
+    build: .                           # Current folder ka Dockerfile use karo
+    restart: always
+    environment:
+      # DATABASE_URL points to local 'db' container (NOT Supabase)
+      # Format: postgresql://USER:PASSWORD@HOST:PORT/DATABASE
+      # 'db' = docker-compose service naam (automatically resolve hota hai)
+      DATABASE_URL: postgresql://credit_user:credit_pass@db:5432/credit_db
+    ports:
+      - "8000:8000"                    # Host:8000 → Container:8000
+    volumes:
+      - .:/app                         # Local code → Container (live reload ke liye)
+    depends_on:
+      db:
+        condition: service_healthy     # db healthy ho tabhi web start ho
+
+# ─── Volumes ─────────────────────────────────────────────────────────────────
+volumes:
+  postgres_data:                       # Named volume — data persist karta hai

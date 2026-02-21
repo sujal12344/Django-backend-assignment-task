@@ -1,0 +1,35 @@
+# .dockerignore — In files ko Docker image mein mat daalo
+# (gitignore jaisa hota hai, lekin Docker ke liye)
+
+# Virtual environment (Docker apna environment banata hai)
+.venv/
+venv/
+env/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Database files (Docker ka apna PostgreSQL hoga)
+db.sqlite3
+*.sqlite3
+
+# Environment files (credentials expose nahi karne chahiye)
+.env
+
+# Git
+.git/
+.gitignore
+
+# VS Code settings
+.vscode/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
